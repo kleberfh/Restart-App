@@ -11,6 +11,9 @@ struct OnboardingView: View {
     
     @AppStorage("onboarding") var isOnboardingViewActive: Bool = true
     
+    @State private var buttonOffSet: CGFloat = 0
+    @State private var buttonWidth: Double = UIScreen.main.bounds.width - 80
+    
     var body: some View {
         ZStack {
             Color("ColorBlue")
@@ -70,7 +73,8 @@ struct OnboardingView: View {
                     HStack {
                         Capsule()
                             .fill(Color("ColorRed"))
-                            .frame(width: 80)
+                            .frame(width: buttonOffSet + 80)
+                        
                         Spacer()
                     }
                     // 4. circle (draggable)
@@ -86,14 +90,28 @@ struct OnboardingView: View {
                         }
                         .foregroundColor(.white)
                         .frame(width: 80, height: 80, alignment: .center)
-                        .onTapGesture {
-                            isOnboardingViewActive = false
-                        }
+                        .offset(x: buttonOffSet)
+                        .gesture(
+                            DragGesture()
+                                .onChanged { gesture in
+                                    if gesture.translation.width > 0 && buttonOffSet <=
+                                        buttonWidth - 80 {
+                                        buttonOffSet = gesture.translation.width
+                                    }
+                                }
+                                .onEnded{ _ in
+                                    if buttonOffSet > buttonWidth / 2 {
+                                        buttonOffSet = buttonWidth - 80
+                                        isOnboardingViewActive = false
+                                    }
+                                    buttonOffSet = 0
+                                }
+                        )//: GESTURE
                         
                         Spacer()
                     }//: HSTACK
                 }//: FOOTER
-                .frame(height: 80, alignment: .center)
+                .frame(width: buttonWidth, height: 80, alignment: .center)
                 .padding()
             }//: VSTACK
             
